@@ -76,10 +76,10 @@ void ProfiledStepper::step(int distance) {
 
 	for(int i = 0; i < sizeof(profile)/sizeof(int); i++) {
 		if(linear_acceleration) {
-			profile[i] = rpm_to_delay(calculate_linear_rpm(abs(distance)));
+			profile[i] = rpm_to_delay(calculate_linear_rpm(abs(distance)), i);
 		}
 		else {
-			profile[i] = rpm_to_delay(calculate_curved_rpm(abs(distance)));
+			profile[i] = rpm_to_delay(calculate_curved_rpm(abs(distance)), i);
 		}
 	}
 
@@ -107,17 +107,17 @@ void ProfiledStepper::stepByRevolution(float revs) {
 	step(revs*steps_per_rev);
 }
 
-float ProfiledStepper::calculate_linear_rpm(int distance) {
+float ProfiledStepper::calculate_linear_rpm(int distance, int current) {
 	if(current_position < accel_length) {
-		if(current_position > 0) {
-			return accel_coefficient*(float)(current_position);
+		if(current > 0) {
+			return accel_coefficient*(float)(current);
 		}
 		else {
-			return accel_coefficient*(float)(current_position+1);
+			return accel_coefficient*(float)(current+1);
 		}
 	}
-	else if(current_position > distance-accel_length && current_position < distance) {
-		return -accel_coefficient*(float)(current_position-distance);
+	else if(current > distance-accel_length && current < distance) {
+		return -accel_coefficient*(float)(current-distance);
 	}
 	else {
 		return (float)top_speed;
